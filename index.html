@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muxy — A blazing-fast terminal multiplexer for macOS</title>
+  <meta name="description" content="Muxy is a native, lightweight terminal multiplexer for macOS. Built in native code for speed, simplicity, and zero overhead." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            ink: {
+              900: '#08090c',
+              800: '#0d0f14',
+              700: '#11141b',
+              600: '#171a23',
+            },
+            accent: {
+              DEFAULT: '#7c5cff',
+              soft: '#a48bff',
+              glow: '#5b3df5',
+            },
+            mint: '#3ddc97',
+          },
+          boxShadow: {
+            'glow': '0 0 60px -10px rgba(124, 92, 255, 0.55)',
+          },
+          animation: {
+            'blink': 'blink 1s steps(2, start) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            blink: { 'to': { visibility: 'hidden' } },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-8px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #08090c;
+      background-image:
+        radial-gradient(at 20% 0%, rgba(124, 92, 255, 0.18) 0px, transparent 50%),
+        radial-gradient(at 80% 10%, rgba(61, 220, 151, 0.10) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(124, 92, 255, 0.08) 0px, transparent 50%);
+    }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    }
+    .terminal-shadow {
+      box-shadow:
+        0 50px 100px -20px rgba(0,0,0,0.6),
+        0 30px 60px -30px rgba(124,92,255,0.4),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #fff 0%, #c4b8ff 50%, #7c5cff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-200 antialiased min-h-screen">
+
+  <!-- Nav -->
+  <header class="relative z-20">
+    <nav class="max-w-7xl mx-auto px-6 lg:px-8 py-5 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-br from-accent to-accent-glow flex items-center justify-center shadow-glow">
+          <span class="font-mono font-bold text-white text-lg leading-none">M</span>
+        </div>
+        <span class="text-xl font-bold tracking-tight text-white">Muxy</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm text-slate-400">
+        <a href="#features" class="hover:text-white transition">Features</a>
+        <a href="#performance" class="hover:text-white transition">Performance</a>
+        <a href="#install" class="hover:text-white transition">Install</a>
+        <a href="https://github.com" class="hover:text-white transition">GitHub</a>
+      </div>
+      <a href="#install" class="hidden md:inline-flex items-center gap-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 text-sm font-medium text-white transition">
+        Download
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-8 pt-16 pb-24 lg:pt-24 lg:pb-32">
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 backdrop-blur">
+          <span class="h-1.5 w-1.5 rounded-full bg-mint animate-pulse"></span>
+          Native macOS · v1.0 now available
+        </div>
+        <h1 class="mt-6 text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05]">
+          <span class="gradient-text">The terminal multiplexer</span><br/>
+          <span class="text-white">that feels instant.</span>
+        </h1>
+        <p class="mt-6 text-lg sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          Muxy is a blazing-fast, native macOS terminal multiplexer. Written in pure native code — no Electron, no Node, no bloat. Just splits, sessions, and serious speed.
+        </p>
+        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a href="#install" class="group inline-flex items-center justify-center gap-2 rounded-xl bg-accent hover:bg-accent-glow transition px-6 py-3 text-base font-semibold text-white shadow-glow">
+            Download for macOS
+            <svg class="w-5 h-5 group-hover:translate-y-0.5 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4h14v-2H5v2z"/></svg>
+          </a>
+          <a href="#install" class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 text-base font-medium text-white transition">
+            <span class="font-mono text-sm text-mint">$</span>
+            brew install muxy
+          </a>
+        </div>
+        <div class="mt-6 flex items-center justify-center gap-6 text-xs text-slate-500">
+          <span class="flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-slate-500"></span>Apple Silicon & Intel</span>
+          <span class="flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-slate-500"></span>~4 MB binary</span>
+          <span class="flex items-center gap-1.5"><span class="h-1 w-1 rounded-full bg-slate-500"></span>MIT licensed</span>
+        </div>
+      </div>
+
+      <!-- Terminal preview -->
+      <div class="relative mt-20 max-w-5xl mx-auto animate-float">
+        <div class="absolute -inset-4 bg-gradient-to-r from-accent/30 via-accent-soft/20 to-mint/20 rounded-3xl blur-2xl opacity-60"></div>
+        <div class="relative rounded-2xl border border-white/10 bg-ink-800 terminal-shadow overflow-hidden">
+          <div class="flex items-center gap-2 px-4 py-3 border-b border-white/5 bg-ink-700">
+            <span class="h-3 w-3 rounded-full bg-[#ff5f57]"></span>
+            <span class="h-3 w-3 rounded-full bg-[#febc2e]"></span>
+            <span class="h-3 w-3 rounded-full bg-[#28c840]"></span>
+            <div class="flex-1 text-center text-xs text-slate-500 font-mono">muxy — work · 3 sessions</div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 font-mono text-[13px] leading-relaxed">
+            <div class="p-5 border-b md:border-b-0 md:border-r border-white/5 bg-ink-800/60">
+              <div class="text-slate-500">~/projects/muxy <span class="text-mint">main</span></div>
+              <div class="mt-2"><span class="text-mint">$</span> <span class="text-slate-300">muxy new --name api</span></div>
+              <div class="text-slate-500 mt-1">› created session "api"</div>
+              <div class="mt-3"><span class="text-mint">$</span> <span class="text-slate-300">cargo run --release</span></div>
+              <div class="text-slate-400 mt-1">  Compiling muxy v1.0.0</div>
+              <div class="text-slate-400">  <span class="text-mint">Finished</span> in 1.2s</div>
+              <div class="text-slate-400">  Listening on <span class="text-accent-soft">:8080</span></div>
+              <div class="mt-2"><span class="text-mint">$</span> <span class="bg-white/80 text-ink-900 w-2 inline-block animate-blink">&nbsp;</span></div>
+            </div>
+            <div class="grid grid-rows-2">
+              <div class="p-5 border-b border-white/5">
+                <div class="text-slate-500">logs</div>
+                <div class="text-slate-400 mt-2">[14:02:11] GET /api/users <span class="text-mint">200</span> 4ms</div>
+                <div class="text-slate-400">[14:02:12] GET /api/health <span class="text-mint">200</span> 1ms</div>
+                <div class="text-slate-400">[14:02:14] POST /api/login <span class="text-mint">200</span> 18ms</div>
+              </div>
+              <div class="p-5">
+                <div class="text-slate-500">watch</div>
+                <div class="text-slate-300 mt-2">CPU  <span class="text-accent-soft">▁▂▃▂▁▂▂▁</span> 4%</div>
+                <div class="text-slate-300">MEM  <span class="text-mint">▂▂▃▃▃▃▂▂</span> 38 MB</div>
+                <div class="text-slate-300">NET  <span class="text-accent-soft">▁▁▂▁▁▁▁▁</span> 12 KB/s</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="relative py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-semibold uppercase tracking-wider text-accent-soft">Why Muxy</p>
+        <h2 class="mt-2 text-4xl sm:text-5xl font-bold tracking-tight text-white">Built for developers who hate waiting.</h2>
+        <p class="mt-4 text-lg text-slate-400">Every interaction is designed to disappear. No spinners, no jank, no warmup time. Open a session, split a pane, switch tabs — it just responds.</p>
+      </div>
+
+      <div class="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">Native speed</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">Hand-tuned native code with zero runtime overhead. Boots in under 20ms and renders at 120 fps on ProMotion displays.</p>
+        </div>
+
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">Effortless splits</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">Vertical, horizontal, nested — split panes with a single keystroke. Resize, swap, and zoom with smooth, predictable motion.</p>
+        </div>
+
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">Persistent sessions</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">Reboot, close the lid, switch projects — your sessions stay exactly where you left them. Detach and reattach instantly.</p>
+        </div>
+
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8V6m0 12v-2"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">Featherweight</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">A 4 MB binary that idles at under 12 MB of memory. No background daemons, no telemetry, no surprises.</p>
+        </div>
+
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">Scriptable layouts</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">Define project layouts in a single YAML file. Open your editor, server, logs, and tests with one command.</p>
+        </div>
+
+        <div class="group rounded-2xl border border-white/10 bg-ink-800/50 p-7 hover:border-accent/40 transition">
+          <div class="h-11 w-11 rounded-lg bg-accent/10 border border-accent/30 flex items-center justify-center text-accent-soft">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <h3 class="mt-5 text-lg font-semibold text-white">macOS-first</h3>
+          <p class="mt-2 text-slate-400 text-sm leading-relaxed">Built around Apple's frameworks. Native fonts, native cursors, Touch ID for sudo, and full Apple Silicon optimization.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Performance -->
+  <section id="performance" class="relative py-24">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="rounded-3xl border border-white/10 bg-gradient-to-br from-ink-800 to-ink-700 p-8 sm:p-12 lg:p-16 overflow-hidden relative">
+        <div class="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-accent/20 blur-3xl"></div>
+        <div class="absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-mint/10 blur-3xl"></div>
+
+        <div class="relative grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-accent-soft">Performance</p>
+            <h2 class="mt-2 text-4xl sm:text-5xl font-bold tracking-tight text-white">Numbers that feel like magic.</h2>
+            <p class="mt-4 text-lg text-slate-400">We benchmark against tmux and Wezterm on every commit. On an M3 Pro, Muxy outperforms both — and uses a fraction of the memory.</p>
+            <div class="mt-8 flex flex-wrap gap-3 text-xs font-mono text-slate-400">
+              <span class="rounded-md bg-white/5 border border-white/10 px-2.5 py-1">macOS 14+</span>
+              <span class="rounded-md bg-white/5 border border-white/10 px-2.5 py-1">Apple Silicon</span>
+              <span class="rounded-md bg-white/5 border border-white/10 px-2.5 py-1">Intel</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6">
+              <div class="text-4xl font-bold text-white">18<span class="text-accent-soft text-2xl">ms</span></div>
+              <div class="mt-1 text-sm text-slate-400">Cold start</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6">
+              <div class="text-4xl font-bold text-white">4<span class="text-accent-soft text-2xl">MB</span></div>
+              <div class="mt-1 text-sm text-slate-400">Binary size</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6">
+              <div class="text-4xl font-bold text-white">12<span class="text-accent-soft text-2xl">MB</span></div>
+              <div class="mt-1 text-sm text-slate-400">Idle memory</div>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-ink-900/60 p-6">
+              <div class="text-4xl font-bold text-white">120<span class="text-accent-soft text-2xl">fps</span></div>
+              <div class="mt-1 text-sm text-slate-400">Render rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Install / CTA -->
+  <section id="install" class="relative py-24">
+    <div class="max-w-3xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-4xl sm:text-5xl font-bold tracking-tight text-white">Install in seconds.</h2>
+      <p class="mt-4 text-lg text-slate-400">One command. No dependencies. Up and running before your coffee gets cold.</p>
+
+      <div class="mt-10 rounded-2xl border border-white/10 bg-ink-800 p-1 max-w-xl mx-auto">
+        <div class="flex items-center gap-3 px-5 py-4 font-mono text-base">
+          <span class="text-mint">$</span>
+          <span class="text-slate-200 flex-1 text-left select-all">brew install muxy</span>
+          <button onclick="navigator.clipboard.writeText('brew install muxy')" class="text-xs text-slate-400 hover:text-white border border-white/10 hover:border-white/30 rounded-md px-2.5 py-1 transition">Copy</button>
+        </div>
+      </div>
+
+      <div class="mt-6 text-sm text-slate-500">
+        or
+        <a href="#" class="text-accent-soft hover:text-white underline underline-offset-4">download the .dmg</a>
+        ·
+        <a href="#" class="text-accent-soft hover:text-white underline underline-offset-4">build from source</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/5 mt-12">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="h-7 w-7 rounded-lg bg-gradient-to-br from-accent to-accent-glow flex items-center justify-center">
+          <span class="font-mono font-bold text-white text-sm leading-none">M</span>
+        </div>
+        <span class="text-sm text-slate-400">© 2026 Muxy. Built with care in native code.</span>
+      </div>
+      <div class="flex items-center gap-6 text-sm text-slate-400">
+        <a href="#" class="hover:text-white transition">Docs</a>
+        <a href="#" class="hover:text-white transition">Changelog</a>
+        <a href="#" class="hover:text-white transition">GitHub</a>
+        <a href="#" class="hover:text-white transition">Twitter</a>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
